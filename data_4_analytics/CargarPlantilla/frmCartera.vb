@@ -7,6 +7,8 @@ Imports System.Windows.Forms
 Imports SAPbouiCOM
 Imports System.Globalization
 Imports Microsoft.Office.Interop
+Imports System.Collections.Generic
+
 
 
 Public Class frmCartera
@@ -34,6 +36,13 @@ Public Class frmCartera
     Dim btnConsultar As SAPbouiCOM.Button
     Dim txtTotCartera As SAPbouiCOM.EditText
     Dim txtTotAbono As SAPbouiCOM.EditText
+    Dim txtCartxVenc As SAPbouiCOM.EditText
+    Dim txtCartVenc As SAPbouiCOM.EditText
+    Dim txtVenc30 As SAPbouiCOM.EditText
+    Dim txtVenc60 As SAPbouiCOM.EditText
+    Dim txtVenc90 As SAPbouiCOM.EditText
+    Dim txtVenc120 As SAPbouiCOM.EditText
+    Dim txtVencM120 As SAPbouiCOM.EditText
 
 
     Dim columnasEsperadas As Integer = 6
@@ -72,6 +81,27 @@ Public Class frmCartera
 
             txtDocEntry = oForm.Items.Item("txt_DEntry").Specific
             txtDocEntry.Item.Enabled = False
+
+            ' Referencias a campos de totales
+            txtTotCartera = oForm.Items.Item("txtTCart").Specific
+            txtCartxVenc = oForm.Items.Item("txtTCrxV").Specific
+            txtCartVenc = oForm.Items.Item("txtTCrVen").Specific
+            txtTotAbono = oForm.Items.Item("txtTAbon").Specific
+            txtVenc30 = oForm.Items.Item("txtV30").Specific
+            txtVenc60 = oForm.Items.Item("txtV60").Specific
+            txtVenc90 = oForm.Items.Item("txtV90").Specific
+            txtVenc120 = oForm.Items.Item("txtV120").Specific
+            txtVencM120 = oForm.Items.Item("txtVm120").Specific
+
+            txtTotCartera.Item.Enabled = False
+            txtCartxVenc.Item.Enabled = False
+            txtCartVenc.Item.Enabled = False
+            txtTotAbono.Item.Enabled = False
+            txtVenc30.Item.Enabled = False
+            txtVenc60.Item.Enabled = False
+            txtVenc90.Item.Enabled = False
+            txtVenc120.Item.Enabled = False
+            txtVencM120.Item.Enabled = False
 
             'txtTotCartera = oForm.Items.Item("txtTCart").Specific
             'txtTotAbono = oForm.Items.Item("txtTAbon").Specific
@@ -164,6 +194,17 @@ Public Class frmCartera
             oMatrix.Columns.Item("Y24PtoEm").Visible = False
             oMatrix.Columns.Item("H8Folio").Visible = False
             oMatrix.Columns.Item("Z25Obj").Visible = False
+
+            Dim totales = ObtenerTotales()
+            txtTotCartera.Value = totales("TotCart").ToString("N2")
+            txtCartxVenc.Value = totales("TotCartxV").ToString("N2")
+            txtCartVenc.Value = totales("TotCartV").ToString("N2")
+            txtTotAbono.Value = totales("TotAbono").ToString("N2")
+            txtVenc30.Value = totales("TotV30").ToString("N2")
+            txtVenc60.Value = totales("TotV60").ToString("N2")
+            txtVenc90.Value = totales("TotV90").ToString("N2")
+            txtVenc120.Value = totales("TotV120").ToString("N2")
+            txtVencM120.Value = totales("TotVm120").ToString("N2")
 
             oForm.Visible = True
             oForm.Select()
@@ -296,6 +337,46 @@ Public Class frmCartera
         End Select
     End Function
 
+    Private Function ObtenerTotales() As Dictionary(Of String, Double)
+        Dim totales As New Dictionary(Of String, Double)
+        Dim oRS As SAPbobsCOM.Recordset = rCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+
+        Dim query As String
+        If rCompany.DbServerType = SAPbobsCOM.BoDataServerTypes.dst_HANADB Then
+            query = "SELECT SUM(""CARTERA_POR_VENCER"") AS ""TotCartxV"", " &
+                    "SUM(""TOTALCARTERA"") AS ""TotCart"", " &
+                    "SUM(""CARTERA_VENCIDA"") AS ""TotCartV"", " &
+                    "SUM(""TOTAL_ABONO"") AS ""TotAbono"", " &
+                    "SUM(""CARTERA_VENCIDA_30"") AS ""TotV30"", " &
+                    "SUM(""CARTERA_VENCIDA_60"") AS ""TotV60"", " &
+                    "SUM(""CARTERA_VENCIDA_90"") AS ""TotV90"", " &
+                    "SUM(""CARTERA_VENCIDA_120"") AS ""TotV120"", " &
+                    "SUM(""CARTERA_VENCIDA_MAS_120"") AS ""TotVm120"" FROM ""Cartera"""
+        Else
+            query = "SELECT SUM([CARTERA_POR_VENCER]) AS TotCartxV, " &
+                    "SUM([TOTALCARTERA]) AS TotCart, " &
+                    "SUM([CARTERA_VENCIDA]) AS TotCartV, " &
+                    "SUM([TOTAL_ABONO]) AS TotAbono, " &
+                    "SUM([CARTERA_VENCIDA_30]) AS TotV30, " &
+                    "SUM([CARTERA_VENCIDA_60]) AS TotV60, " &
+                    "SUM([CARTERA_VENCIDA_90]) AS TotV90, " &
+                    "SUM([CARTERA_VENCIDA_120]) AS TotV120, " &
+                    "SUM([CARTERA_VENCIDA_MAS_120]) AS TotVm120 FROM [Cartera]"
+        End If
+
+        oRS.DoQuery(query)
+        totales("TotCart") = Convert.ToDouble(oRS.Fields.Item("TotCart").Value)
+        totales("TotCartxV") = Convert.ToDouble(oRS.Fields.Item("TotCartxV").Value)
+        totales("TotCartV") = Convert.ToDouble(oRS.Fields.Item("TotCartV").Value)
+        totales("TotAbono") = Convert.ToDouble(oRS.Fields.Item("TotAbono").Value)
+        totales("TotV30") = Convert.ToDouble(oRS.Fields.Item("TotV30").Value)
+        totales("TotV60") = Convert.ToDouble(oRS.Fields.Item("TotV60").Value)
+        totales("TotV90") = Convert.ToDouble(oRS.Fields.Item("TotV90").Value)
+        totales("TotV120") = Convert.ToDouble(oRS.Fields.Item("TotV120").Value)
+        totales("TotVm120") = Convert.ToDouble(oRS.Fields.Item("TotVm120").Value)
+
+        Return totales
+    End Function
 
     Public Sub LlenarMatrixCartera()
         Try
@@ -374,6 +455,17 @@ Public Class frmCartera
             oMatrix.Columns.Item("Y24PtoEm").Visible = False
             oMatrix.Columns.Item("H8Folio").Visible = False
             oMatrix.Columns.Item("Z25Obj").Visible = False
+
+            Dim totales = ObtenerTotales()
+            txtTotCartera.Value = totales("TotCart").ToString("N2")
+            txtCartxVenc.Value = totales("TotCartxV").ToString("N2")
+            txtCartVenc.Value = totales("TotCartV").ToString("N2")
+            txtTotAbono.Value = totales("TotAbono").ToString("N2")
+            txtVenc30.Value = totales("TotV30").ToString("N2")
+            txtVenc60.Value = totales("TotV60").ToString("N2")
+            txtVenc90.Value = totales("TotV90").ToString("N2")
+            txtVenc120.Value = totales("TotV120").ToString("N2")
+            txtVencM120.Value = totales("TotVm120").ToString("N2")
 
             rsboApp.StatusBar.SetText("Datos cargados correctamente.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
 
