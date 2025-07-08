@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AddOnRegData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SlientInstallation="No" SlientUpgrade="No" Partnernmsp="SOLSAP S.A" SchemaVersion="3.0" Type="" MultipleVersion="false" OnDemand="" OnPremise="" ExtName="DataAnalysis 1.0" ExtVersion="1.0" Contdata="" Partner="SOLSAP S.A" DBType="Both" ClientType="A">
+  <Validity>
+    <SBOCompatibility>
+      <Version From="900.000.00" To="1000.160.06" />
+    </SBOCompatibility>
+  </Validity>
+  <Configuration>
+    <Repository>
+      <Properties />
+    </Repository>
+    <Deployment>
+      <Properties />
+    </Deployment>
+    <Assignment>
+      <Properties />
+    </Assignment>
+  </Configuration>
+  <Addons>
+    <Addon Name="" Group="" ForceFlag="" Visible="" AutoAssign="" SelfUpgrd="">
+      <x86 AddonExe="" AddonSig="">
+        <Installation>
+          <Files />
+        </Installation>
+        <Uninstallation>
+          <Files />
+        </Uninstallation>
+      </x86>
+      <x64 AddonExe="C:\Users\William\Desktop\ADD-ONS SOLSAP\SERUVI\PROYECTOS\slnIntegracionEcommerce\slnIntegracionEcommerce\bin\x64\Debug\sln_Udo_Valores.exe" AddonSig="">
+        <Installation>
+          <Files>
+            <File FileName="conf_redim.png">
+              <Actions />
+            </File>
+            <File FileName="Entidades.dll">
+              <Actions />
+            </File>
+            <File FileName="Entidades.dll.config">
+              <Actions />
+            </File>
+            <File FileName="frmAcercaDe.srf">
+              <Actions />
+            </File>
+            <File FileName="frmCartera.srf">
+              <Actions />
+            </File>
+            <File FileName="frmConfClave.srf">
+              <Actions />
+            </File>
+            <File FileName="frmConfMenu.srf">
+              <Actions />
+            </File>
+            <File FileName="frmCreaTercero.srf">
+              <Actions />
+            </File>
+            <File FileName="frmEstadistica.srf">
+              <Actions />
+            </File>
+            <File FileName="frmParametrosAddon.srf">
+              <Actions />
+            </File>
+            <File FileName="frmPlantilla.srf">
+              <Actions />
+            </File>
+            <File FileName="frmPlantRpt.srf">
+              <Actions />
+            </File>
+            <File FileName="Funciones_SAP.dll">
+              <Actions />
+            </File>
+            <File FileName="icono2.png">
+              <Actions />
+            </File>
+            <File FileName="icono_pre.png">
+              <Actions />
+            </File>
+            <File FileName="logo11.png">
+              <Actions />
+            </File>
+            <File FileName="LogoLoc.png">
+              <Actions />
+            </File>
+            <File FileName="logoPPTO3_redim.png">
+              <Actions />
+            </File>
+            <File FileName="logoPPTO_redim.png">
+              <Actions />
+            </File>
+            <File FileName="LogoSS.png">
+              <Actions />
+            </File>
+            <File FileName="presu_redim.png">
+              <Actions />
+            </File>
+            <File FileName="sln_Udo_Valores.exe">
+              <Actions />
+            </File>
+            <File FileName="SSLogoPresu.png">
+              <Actions />
+            </File>
+            <File FileName="Utilitario.dll">
+              <Actions />
+            </File>
+          </Files>
+        </Installation>
+        <Uninstallation>
+          <Files>
+            <File FileName="conf_redim.png">
+              <Actions />
+            </File>
+            <File FileName="Entidades.dll">
+              <Actions />
+            </File>
+            <File FileName="Entidades.dll.config">
+              <Actions />
+            </File>
+            <File FileName="frmAcercaDe.srf">
+              <Actions />
+            </File>
+            <File FileName="frmCartera.srf">
+              <Actions />
+            </File>
+            <File FileName="frmConfClave.srf">
+              <Actions />
+            </File>
+            <File FileName="frmConfMenu.srf">
+              <Actions />
+            </File>
+            <File FileName="frmCreaTercero.srf">
+              <Actions />
+            </File>
+            <File FileName="frmEstadistica.srf">
+              <Actions />
+            </File>
+            <File FileName="frmParametrosAddon.srf">
+              <Actions />
+            </File>
+            <File FileName="frmPlantilla.srf">
+              <Actions />
+            </File>
+            <File FileName="frmPlantRpt.srf">
+              <Actions />
+            </File>
+            <File FileName="Funciones_SAP.dll">
+              <Actions />
+            </File>
+            <File FileName="icono2.png">
+              <Actions />
+            </File>
+            <File FileName="icono_pre.png">
+              <Actions />
+            </File>
+            <File FileName="logo11.png">
+              <Actions />
+            </File>
+            <File FileName="LogoLoc.png">
+              <Actions />
+            </File>
+            <File FileName="logoPPTO3_redim.png">
+              <Actions />
+            </File>
+            <File FileName="logoPPTO_redim.png">
+              <Actions />
+            </File>
+            <File FileName="LogoSS.png">
+              <Actions />
+            </File>
+            <File FileName="presu_redim.png">
+              <Actions />
+            </File>
+            <File FileName="sln_Udo_Valores.exe">
+              <Actions />
+            </File>
+            <File FileName="SSLogoPresu.png">
+              <Actions />
+            </File>
+            <File FileName="Utilitario.dll">
+              <Actions />
+            </File>
+          </Files>
+        </Uninstallation>
+      </x64>
+    </Addon>
+  </Addons>
+  <XApps>
+    <XApp Name="" Path="" FileName="" />
+  </XApps>
+  <UDQs>
+    <UDQ udqname="">
+      <Hana FileName="" />
+    </UDQ>
+  </UDQs>
+</AddOnRegData>

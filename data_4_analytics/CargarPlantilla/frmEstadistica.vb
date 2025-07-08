@@ -1,0 +1,343 @@
+﻿Imports System.IO
+Imports System.Security.Cryptography
+Imports System.Text
+Imports System.Xml
+Imports System.Security.Permissions
+Imports System.Windows.Forms
+Imports SAPbouiCOM
+Imports System.Globalization
+Imports Microsoft.Office.Interop
+
+
+Public Class frmEstadistica
+
+    Private oForm As SAPbouiCOM.Form
+
+    Private rCompany As SAPbobsCOM.Company
+    Private WithEvents rsboApp As SAPbouiCOM.Application
+
+    Dim lineaMatrix As Integer = 0
+    Dim customCulture As CultureInfo
+
+    Dim oCFL As SAPbouiCOM.ChooseFromList
+    Dim oCFL_Ter As SAPbouiCOM.ChooseFromList
+    Dim oCFLs As SAPbouiCOM.ChooseFromListCollection
+    Dim oCFLCreationParams As SAPbouiCOM.ChooseFromListCreationParams
+    Dim oCFLCreationParamsTer As SAPbouiCOM.ChooseFromListCreationParams
+    Dim oConditions As SAPbouiCOM.Conditions
+    Dim oCondition As SAPbouiCOM.Condition
+    Dim oUserDataSource As SAPbouiCOM.UserDataSource
+    Dim oMatrix As SAPbouiCOM.Matrix
+    Dim txtDocEntry As SAPbouiCOM.EditText
+    Dim txtAnio As SAPbouiCOM.EditText
+
+    Dim columnasEsperadas As Integer = 6
+
+    Sub New(ByVal Company As SAPbobsCOM.Company, ByVal sboApp As SAPbouiCOM.Application)
+        rCompany = Company
+        rsboApp = sboApp
+    End Sub
+
+    Public Sub CargaFormEstadistico()
+        Dim xmlDoc As New Xml.XmlDocument
+        Dim strPath As String
+
+        If RecorreFormulario(rsboApp, "frmEstadistica") Then
+            Exit Sub
+        End If
+
+        strPath = System.Windows.Forms.Application.StartupPath & "\frmEstadistica.srf"
+        xmlDoc.Load(strPath)
+        Try
+            Try
+                rsboApp.LoadBatchActions(xmlDoc.InnerXml)
+
+            Catch exx As Exception
+                rsboApp.Forms.Item("frmEstadistica").Close()
+                xmlDoc = Nothing
+                Exit Sub
+            End Try
+
+            oForm = rsboApp.Forms.Item("frmEstadistica")
+            oForm.Freeze(True)
+
+            Dim ipLogo As SAPbouiCOM.PictureBox
+            ipLogo = oForm.Items.Item("ipLogo").Specific
+            ipLogo.Picture = Windows.Forms.Application.StartupPath & "\LogoSS.png"
+
+            oForm.Height = 530
+            oForm.Width = 600
+
+            oForm = rsboApp.Forms.Item("frmEstadistica")
+            oForm.Freeze(True)
+
+            txtDocEntry = oForm.Items.Item("txtDEntry").Specific
+
+            txtAnio = oForm.Items.Item("txtAnio").Specific
+
+            oMatrix = oForm.Items.Item("MTX_UDO").Specific
+
+            txtDocEntry.Item.Enabled = False
+
+            Dim anchoTotal As Integer = oForm.Items.Item("MTX_UDO").Width
+
+            'oMatrix.Columns.Item(0).Width = 20
+
+            'anchoTotal = anchoTotal - 20
+
+            Dim anchoPorColumna As Integer = anchoTotal \ oMatrix.Columns.Count
+
+            For i As Integer = 0 To oMatrix.Columns.Count - 1
+                If i = 0 Then
+                    oMatrix.Columns.Item(i).Width = 30
+                Else
+                    oMatrix.Columns.Item(i).Width = 85
+                End If
+            Next
+
+            oForm.Mode = BoFormMode.fm_ADD_MODE
+
+            oForm.Visible = True
+            oForm.Select()
+
+            oForm.Freeze(False)
+
+        Catch ex As Exception
+            rsboApp.MessageBox(NombreAddon + " Ocurrio un Error al Cargar la Pantalla: " + ex.Message.ToString())
+        End Try
+
+    End Sub
+
+    Private Function RecorreFormulario(ByVal oApp As SAPbouiCOM.Application, ByVal Formulario As String) As Boolean
+        Try
+            For Each oForm In oApp.Forms
+                Select Case oForm.UniqueID
+                    Case Formulario
+                        oForm.Visible = True
+                        oForm.Select()
+                        Return True
+                End Select
+            Next
+
+            For Each oForm In oApp.Forms
+                If oForm.UniqueID = Formulario Then
+                    oForm.Visible = True
+                    oForm.Select()
+                    ' oForm.Close()
+                    Return True
+                End If
+            Next
+            Return False
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Private Sub rsboApp_ItemEvent(ByVal FormUID As String, ByRef pVal As SAPbouiCOM.ItemEvent, ByRef BubbleEvent As Boolean) Handles rsboApp.ItemEvent
+        Try
+            If pVal.FormUID = "frmEstadistica" Then
+                Select Case pVal.ItemUID
+
+                    Case "btn_cons"
+                        If pVal.BeforeAction = False AndAlso pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
+                            ' Lógica si la necesitas
+                        End If
+
+                    Case "btnCP"
+                        If pVal.BeforeAction = True AndAlso pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
+                            Dim Anio As String = If(String.IsNullOrEmpty(txtAnio.Value), "", txtAnio.Value)
+                            Try
+                                Dim AnioInt As Integer = CInt(Anio)
+
+                                If Anio = "" Then
+                                    rsboApp.StatusBar.SetText("Ingrese el año...", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                    BubbleEvent = False
+                                    Exit Sub
+                                End If
+
+                                ' Diálogo de archivo
+                                Utilitario.Util_Log.Escribir_Log("evento click frmEstadistica ItemUID = btnCP", "frmEstadistica")
+                                Dim selectFileDialog As New SelectFileDialog("C:\", "", "CSV files (*.csv)|*.csv|All files (*.*)|*.*", DialogType.OPEN)
+                                selectFileDialog.Open()
+
+                                If Not String.IsNullOrWhiteSpace(selectFileDialog.SelectedFile) Then
+                                    Dim ruta As String = selectFileDialog.SelectedFile
+                                    Dim validacion As Integer = ValidarCSV(ruta, columnasEsperadas)
+
+                                    Select Case validacion
+                                        Case 0
+                                            rsboApp.StatusBar.SetText("✅ El archivo es válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+                                            leerCSV(ruta)
+                                        Case 1
+                                            rsboApp.StatusBar.SetText("[Error]: El archivo no está delimitado por ';'.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                        Case 2
+                                            rsboApp.StatusBar.SetText($"[Error]: Se esperaban {columnasEsperadas} columnas, pero se encontraron menos o más.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                        Case 3
+                                            rsboApp.StatusBar.SetText("[Error]: Archivo vacío.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                        Case Else
+                                            rsboApp.StatusBar.SetText("[Error]: Puede que el archivo esté abierto.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                    End Select
+                                End If
+
+                            Catch ex As Exception
+                                rsboApp.StatusBar.SetText("Ingrese un valor válido para año...", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                BubbleEvent = False
+                                Exit Sub
+                            End Try
+                        End If
+
+                    Case "1" ' Botón grabar
+                        If pVal.BeforeAction = True AndAlso pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
+                            Dim AnioIngresado As String = txtAnio.Value.Trim()
+
+                            If oMatrix.RowCount = 0 OrElse oMatrix.VisualRowCount = 0 Then
+                                rsboApp.MessageBox("No se puede grabar. La Matrix está vacía.")
+                                BubbleEvent = False
+                                Exit Sub
+                            End If
+
+                            If String.IsNullOrEmpty(AnioIngresado) OrElse Not IsNumeric(AnioIngresado) Then
+                                rsboApp.StatusBar.SetText("[Error] Ingrese un año válido antes de grabar.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                BubbleEvent = False
+                                Exit Sub
+                            End If
+
+                            ' Validar fechas de la matrix
+                            Dim oDataSource As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_ESTADISTICAD")
+
+                            For index As Integer = 0 To oDataSource.Size - 1
+                                Dim fechaStr As String = oDataSource.GetValue("U_FECHA", index).Trim()
+                                If fechaStr.Length >= 4 Then
+                                    Dim anioFecha As String = fechaStr.Substring(0, 4)
+                                    If anioFecha <> AnioIngresado Then
+                                        rsboApp.StatusBar.SetText($"[Error] El año ingresado ({AnioIngresado}) no coincide con el año de la línea {index + 1}: {anioFecha}.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                                        BubbleEvent = False
+                                        Exit Sub
+                                    End If
+                                End If
+                            Next
+
+                            ' Si pasa todo: OK
+                            rsboApp.StatusBar.SetText("✅ Validación de año correcta.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+                        End If
+
+                End Select
+            End If
+
+        Catch ex As Exception
+            rsboApp.MessageBox("Error en evento: " & ex.Message)
+        End Try
+    End Sub
+
+
+    Function leerCSV(ByVal ruta As String) As Boolean
+        Try
+            rsboApp.StatusBar.SetText("Leyendo archivo csv, por favor esperar un momento..!", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Warning)
+            oForm.Freeze(True)
+            customCulture = CType(CultureInfo.InvariantCulture.Clone(), CultureInfo)
+            customCulture.NumberFormat.NumberDecimalSeparator = "."
+            customCulture.NumberFormat.NumberGroupSeparator = ","
+
+            Dim oMatrix As Matrix = oForm.Items.Item("MTX_UDO").Specific
+            Dim DatosEnExcel As New List(Of String)
+
+            Using reader As New StreamReader(ruta)
+                Dim rowIndex As Integer = 1
+
+                If rowIndex = 1 Then
+                    reader.ReadLine()
+                End If
+
+                While Not reader.EndOfStream
+                    Dim line As String = reader.ReadLine()
+                    DatosEnExcel.Add(line)
+                    rowIndex += 1
+                End While
+            End Using
+
+            Dim oProgressBar As SAPbouiCOM.ProgressBar
+            oProgressBar = rsboApp.StatusBar.CreateProgressBar("Procesando CSV..", DatosEnExcel.Count, False)
+
+            Dim oDataSource As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_ESTADISTICAD")
+
+            oDataSource.Clear()
+            oMatrix.Clear()
+
+            Dim j As Integer = 0
+            For Each filas In DatosEnExcel
+                oDataSource.InsertRecord(j)
+                oDataSource.SetValue("LineId", j, j + 1)
+                oDataSource.SetValue("U_CC", j, filas.Split(";")(0))
+                oDataSource.SetValue("U_FECHA", j, filas.Split(";")(1))
+                oDataSource.SetValue("U_VEHICULOS", j, filas.Split(";")(2))
+                oDataSource.SetValue("U_BANDEJAS", j, filas.Split(";")(3))
+                oDataSource.SetValue("U_CINES", j, filas.Split(";")(4))
+                oDataSource.SetValue("U_CLIENTES", j, filas.Split(";")(5))
+
+                oProgressBar.Value = j
+                j += 1
+            Next
+
+            Dim anioIngresado As String = txtAnio.Value.Trim()
+            Dim anioFecha As String = ""
+
+            For index As Integer = 0 To oDataSource.Size - 1
+                Dim fechaStr As String = oDataSource.GetValue("U_FECHA", index).Trim()
+
+                If fechaStr.Length >= 4 Then
+                    anioFecha = fechaStr.Substring(0, 4)
+
+                    If anioFecha <> anioIngresado Then
+                        rsboApp.StatusBar.SetText($"[Error] La fecha en la línea {index + 1} no coincide con el año ingresado ({anioIngresado}). Valor encontrado: {fechaStr}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        oForm.Freeze(False)
+                        oProgressBar.Stop()
+                        Return False
+                    End If
+                Else
+                    rsboApp.StatusBar.SetText($"[Error] Formato de fecha inválido en línea {index + 1}: {fechaStr}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                    oForm.Freeze(False)
+                    oProgressBar.Stop()
+                    Return False
+                End If
+            Next
+
+            oMatrix.LoadFromDataSource()
+            oForm.Freeze(False)
+            oProgressBar.Stop()
+            rsboApp.StatusBar.SetText("Datos cargados desde el archivo CSV.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+            Return True
+
+        Catch ex As Exception
+            rsboApp.StatusBar.SetText(" Error al Leer archivo .csv: " + ex.Message.ToString(), SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+            oForm.Freeze(False)
+            Return False
+        End Try
+    End Function
+
+
+    Function ValidarCSV(rutaArchivo As String, columnasEsperadas As Integer) As Integer
+        Try
+            Using sr As New StreamReader(rutaArchivo)
+                Dim linea As String = sr.ReadLine()
+
+                If String.IsNullOrEmpty(linea) Then Return 3 ' Archivo vacío
+
+                ' Validar si la línea contiene al menos un ';'
+                If Not linea.Contains(";"c) Then Return 1 ' No está delimitado por ';'
+
+                ' Separar la línea por ';' y contar columnas
+                Dim columnas() As String = linea.Split(";"c)
+
+                ' Validar cantidad de columnas
+                If columnas.Length <> columnasEsperadas Then Return 2 ' Número incorrecto de columnas
+
+                Return 0 ' Archivo válido
+            End Using
+        Catch ex As Exception
+            'Console.WriteLine("Error al leer el archivo: " & ex.Message)
+            rsboApp.StatusBar.SetText(" Error al Leer archivo .cvs, " + ex.Message.ToString(), SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+            Return 4 ' Error al leer archivo
+        End Try
+    End Function
+
+End Class
