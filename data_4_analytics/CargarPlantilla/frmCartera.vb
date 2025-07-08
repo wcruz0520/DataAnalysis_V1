@@ -43,6 +43,7 @@ Public Class frmCartera
     Dim txtVenc90 As SAPbouiCOM.EditText
     Dim txtVenc120 As SAPbouiCOM.EditText
     Dim txtVencM120 As SAPbouiCOM.EditText
+    Dim oProgressBar As SAPbouiCOM.ProgressBar
 
 
     Dim columnasEsperadas As Integer = 6
@@ -103,10 +104,6 @@ Public Class frmCartera
             txtVenc120.Item.Enabled = False
             txtVencM120.Item.Enabled = False
 
-            'txtTotCartera = oForm.Items.Item("txtTCart").Specific
-            'txtTotAbono = oForm.Items.Item("txtTAbon").Specific
-
-
             oMatrix = oForm.Items.Item("MTX_UDO").Specific
 
             oForm.Mode = BoFormMode.fm_ADD_MODE
@@ -125,12 +122,15 @@ Public Class frmCartera
             text_fecha.Item.Enabled = False
 
             Dim oRecordSet As SAPbobsCOM.Recordset
+            'oProgressBar = Nothing
             oRecordSet = rCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
             'Dim query As String = "EXEC ""Cartera_SP"""
             'Dim query As String = "SELECT * FROM ""_SYS_BIC"".""sap.sbose/SV_ANTIGUEDAD_CARTERA_CLIENTES"""
             Dim query As String = "SELECT * FROM ""Cartera"""
             oRecordSet.DoQuery(query)
+
+            oProgressBar = rsboApp.StatusBar.CreateProgressBar("Cargando cartera...", oRecordSet.RecordCount, False)
 
             Dim oDataSource As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_CARTERA_DET1")
             oDataSource.Clear()
@@ -181,10 +181,13 @@ Public Class frmCartera
                 oDataSource.SetValue("U_ObjType", i, oRecordSet.Fields.Item("ObjType").Value)
                 oDataSource.SetValue("U_NumInter", i, oRecordSet.Fields.Item("DocEntry").Value)
 
+                oProgressBar.Value = i
 
                 oRecordSet.MoveNext()
                 i += 1
             End While
+
+            oProgressBar.Stop()
 
             oMatrix.LoadFromDataSource()
 
@@ -214,6 +217,7 @@ Public Class frmCartera
         Catch ex As Exception
             rsboApp.MessageBox("Error al cargar la pantalla: " & ex.Message)
         Finally
+            'If oProgressBar IsNot Nothing Then oProgressBar.Stop()
             oForm.Freeze(False)
         End Try
     End Sub
@@ -326,6 +330,10 @@ Public Class frmCartera
         End Try
     End Sub
 
+    'Private Sub rsbApp_MenuEvent()
+
+    'End Sub
+
     Private Function GetFormEnum(ByVal objType As String) As SAPbouiCOM.BoFormObjectEnum
         Select Case objType
             Case "13"
@@ -384,12 +392,15 @@ Public Class frmCartera
             oForm.Freeze(True)
 
             Dim oRecordSet As SAPbobsCOM.Recordset
+            'oProgressBar = Nothing
             oRecordSet = rCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
             'Dim query As String = "EXEC ""Cartera_SP"""
             'Dim query As String = "SELECT * FROM ""_SYS_BIC"".""sap.sbose/SV_ANTIGUEDAD_CARTERA_CLIENTES"""
             Dim query As String = "SELECT * FROM ""Cartera"""
             oRecordSet.DoQuery(query)
+
+            oProgressBar = rsboApp.StatusBar.CreateProgressBar("Cargando cartera...", oRecordSet.RecordCount, False)
 
             Dim oDataSource As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_CARTERA_DET1")
 
@@ -443,10 +454,12 @@ Public Class frmCartera
                 oDataSource.SetValue("U_ObjType", i, oRecordSet.Fields.Item("ObjType").Value)
                 oDataSource.SetValue("U_NumInter", i, oRecordSet.Fields.Item("DocEntry").Value)
 
+                oProgressBar.Value = i
                 oRecordSet.MoveNext()
                 i += 1
             End While
 
+            oProgressBar.Stop()
             oMatrix.LoadFromDataSource()
 
             oMatrix.Columns.Item("U21CVend").Visible = False
@@ -472,6 +485,8 @@ Public Class frmCartera
         Catch ex As Exception
             rsboApp.MessageBox("Error al llenar la Matrix: " & ex.Message)
         Finally
+            'If oProgressBar IsNot Nothing Then oProgressBar.Stop()
+
             If oForm.Mode = SAPbouiCOM.BoFormMode.fm_ADD_MODE Then
                 text_fecha = oForm.Items.Item("text_fecha").Specific
                 text_fecha.Value = DateTime.Now.ToString("yyyyMMdd")
