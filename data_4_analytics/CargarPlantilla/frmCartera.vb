@@ -330,9 +330,20 @@ Public Class frmCartera
         End Try
     End Sub
 
-    'Private Sub rsbApp_MenuEvent()
-
-    'End Sub
+    Private Sub rsboApp_MenuEvent(ByRef pVal As SAPbouiCOM.MenuEvent, ByRef BubbleEvent As Boolean) Handles rsboApp.MenuEvent
+        Try
+            If pVal.BeforeAction AndAlso pVal.MenuUID = "1283" Then
+                If rsboApp.Forms.ActiveForm.UniqueID = "frmCartera" Then
+                    Dim respuesta As Integer = rsboApp.MessageBox("¿Está seguro que desea eliminar el registro?", 1, "Sí", "No")
+                    If respuesta <> 1 Then
+                        BubbleEvent = False
+                    End If
+                End If
+            End If
+        Catch ex As Exception
+            rsboApp.MessageBox("Error en MenuEvent: " & ex.Message)
+        End Try
+    End Sub
 
     Private Function GetFormEnum(ByVal objType As String) As SAPbouiCOM.BoFormObjectEnum
         Select Case objType
