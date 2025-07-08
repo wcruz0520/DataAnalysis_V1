@@ -165,29 +165,6 @@ Public Class frmCartera
             oMatrix.Columns.Item("H8Folio").Visible = False
             oMatrix.Columns.Item("Z25Obj").Visible = False
 
-            'Dim totalCartera As Double = 0
-            'Dim totalAbono As Double = 0
-
-            'For p As Integer = 1 To oMatrix.RowCount
-            '    Dim valCart As Double = 0
-            '    Dim valAbono As Double = 0
-
-            '    Double.TryParse(oMatrix.Columns.Item("K11TCart").Cells.Item(p).Specific.Value, valCart)
-            '    Double.TryParse(oMatrix.Columns.Item("O15TAbo").Cells.Item(p).Specific.Value, valAbono)
-
-            '    totalCartera += valCart
-            '    totalAbono += valAbono
-            'Next
-
-            'txtTotCartera.Value = totalCartera.ToString("N2")
-            'txtTotAbono.Value = totalAbono.ToString("N2")
-
-
-
-            'Dim oEditTextColumn As SAPbouiCOM.EditTextColumn
-            'oEditTextColumn = oMatrix.Columns.Item("D4CrdCod")
-            'oEditTextColumn.LinkedObjectType = "2"
-
             oForm.Visible = True
             oForm.Select()
 
