@@ -160,18 +160,20 @@ Public Class frmEstadistica
                                 Dim selectFileDialog As New SelectFileDialog("C:\", "", "CSV files (*.csv)|*.csv|All files (*.*)|*.*", DialogType.OPEN)
                                 selectFileDialog.Open()
 
-                                If Not String.IsNullOrWhiteSpace(selectFileDialog.SelectedFile) Then
-                                    Dim ruta As String = selectFileDialog.SelectedFile
-                                    Dim validacion As Integer = ValidarCSV(ruta, columnasEsperadas)
+                If Not String.IsNullOrWhiteSpace(selectFileDialog.SelectedFile) Then
+                    Dim ruta As String = selectFileDialog.SelectedFile
+                    Dim validacion As Integer = ValidarCSV(ruta, columnasEsperadas)
 
-                                    Select Case validacion
-                                        Case 0
-                                            rsboApp.StatusBar.SetText("✅ El archivo es válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
-                                            leerCSV(ruta)
-                                        Case 1
-                                            rsboApp.StatusBar.SetText("[Error]: El archivo no está delimitado por ';'.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
-                                        Case 2
-                                            rsboApp.StatusBar.SetText($"[Error]: Se esperaban {columnasEsperadas} columnas, pero se encontraron menos o más.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                    Select Case validacion
+                        Case 0
+                            If ValidarContenidoCSV(ruta) Then
+                                rsboApp.StatusBar.SetText("✅ El archivo es válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+                                leerCSV(ruta)
+                            End If
+                        Case 1
+                            rsboApp.StatusBar.SetText("[Error]: El archivo no está delimitado por ';'.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Case 2
+                            rsboApp.StatusBar.SetText($"[Error]: Se esperaban {columnasEsperadas} columnas, pero se encontraron menos o más.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
                                         Case 3
                                             rsboApp.StatusBar.SetText("[Error]: Archivo vacío.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
                                         Case Else
@@ -336,7 +338,71 @@ Public Class frmEstadistica
         Catch ex As Exception
             'Console.WriteLine("Error al leer el archivo: " & ex.Message)
             rsboApp.StatusBar.SetText(" Error al Leer archivo .cvs, " + ex.Message.ToString(), SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
-            Return 4 ' Error al leer archivo
+                Return 4 ' Error al leer archivo
+        End Try
+    End Function
+
+    Private Function ValidarContenidoCSV(ruta As String) As Boolean
+        Try
+            customCulture = CType(CultureInfo.InvariantCulture.Clone(), CultureInfo)
+            customCulture.NumberFormat.NumberDecimalSeparator = "."
+            customCulture.NumberFormat.NumberGroupSeparator = ","
+
+            Using sr As New StreamReader(ruta)
+                Dim lineNumber As Integer = 1
+
+                If Not sr.EndOfStream Then sr.ReadLine() 'encabezado
+
+                While Not sr.EndOfStream
+                    lineNumber += 1
+                    Dim line As String = sr.ReadLine()
+                    Dim campos() As String = line.Split(";"c)
+
+                    If campos.Length <> columnasEsperadas Then
+                        rsboApp.StatusBar.SetText($"[Error] Línea {lineNumber}: cantidad de columnas incorrecta.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Return False
+                    End If
+
+                    Dim valorEntero As Long
+                    If Not Long.TryParse(campos(0).Trim(), NumberStyles.Integer, customCulture, valorEntero) Then
+                        rsboApp.StatusBar.SetText($"[Error] Línea {lineNumber}: 'Centro comercial' no es numérico válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Return False
+                    End If
+
+                    Dim fechaTmp As Date
+                    Dim formatos() As String = {"yyyyMMdd", "yyyy-MM-dd"}
+                    If Not Date.TryParseExact(campos(1).Trim(), formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, fechaTmp) Then
+                        rsboApp.StatusBar.SetText($"[Error] Línea {lineNumber}: 'FECHA' inválida. Use 'yyyyMMdd' o 'yyyy-MM-dd'.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Return False
+                    End If
+
+                    Dim decimalTmp As Decimal
+                    If Not Decimal.TryParse(campos(2).Trim(), NumberStyles.AllowDecimalPoint Or NumberStyles.AllowThousands, customCulture, decimalTmp) Then
+                        rsboApp.StatusBar.SetText($"[Error] Línea {lineNumber}: 'Vehiculos' no es número válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Return False
+                    End If
+
+                    If Not Decimal.TryParse(campos(3).Trim(), NumberStyles.AllowDecimalPoint Or NumberStyles.AllowThousands, customCulture, decimalTmp) Then
+                        rsboApp.StatusBar.SetText($"[Error] Línea {lineNumber}: 'Bandejas' no es número válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Return False
+                    End If
+
+                    If Not Decimal.TryParse(campos(4).Trim(), NumberStyles.AllowDecimalPoint Or NumberStyles.AllowThousands, customCulture, decimalTmp) Then
+                        rsboApp.StatusBar.SetText($"[Error] Línea {lineNumber}: 'Cines' no es número válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Return False
+                    End If
+
+                    If Not Decimal.TryParse(campos(5).Trim(), NumberStyles.AllowDecimalPoint Or NumberStyles.AllowThousands, customCulture, decimalTmp) Then
+                        rsboApp.StatusBar.SetText($"[Error] Línea {lineNumber}: 'Clientes' no es número válido.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                        Return False
+                    End If
+
+                End While
+            End Using
+            Return True
+        Catch ex As Exception
+            rsboApp.StatusBar.SetText(" Error al validar archivo .csv: " & ex.Message, SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+            Return False
         End Try
     End Function
 
