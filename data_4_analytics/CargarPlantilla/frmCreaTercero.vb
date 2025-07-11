@@ -68,6 +68,7 @@ Public Class frmCreaTercero
 
     Private Sub GuardarCambios()
         Try
+            oForm.Freeze(True)
             Dim oDT As DataTable = oForm.DataSources.DataTables.Item("DT_TERCEROS")
             Dim oRS As Recordset = rCompany.GetBusinessObject(BoObjectTypes.BoRecordset)
 
@@ -88,6 +89,8 @@ Public Class frmCreaTercero
 
                 If String.IsNullOrEmpty(code) OrElse String.IsNullOrEmpty(id) OrElse String.IsNullOrEmpty(nombre) Then
                     Continue For
+                    'rsboApp.StatusBar.SetText("No olvidar llenar los campos de Id, Nombre de Tercero", BoMessageTime.bmt_Short, BoStatusBarMessageType.smt_Error)
+                    'Exit Sub
                 End If
 
                 nuevosCodigos.Add(code)
@@ -126,6 +129,8 @@ Public Class frmCreaTercero
             RefrescarGrid()
         Catch ex As Exception
             rsboApp.StatusBar.SetText("Error al guardar cambios: " & ex.Message, BoMessageTime.bmt_Long, BoStatusBarMessageType.smt_Error)
+        Finally
+            oForm.Freeze(False)
         End Try
     End Sub
 

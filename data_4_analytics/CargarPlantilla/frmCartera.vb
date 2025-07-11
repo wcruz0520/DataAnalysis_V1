@@ -182,6 +182,7 @@ Public Class frmCartera
                 oDataSource.SetValue("U_NumInter", i, oRecordSet.Fields.Item("DocEntry").Value)
 
                 oProgressBar.Value = i
+                oProgressBar.Text = $"{oRecordSet.Fields.Item("CardName").Value} - {oRecordSet.Fields.Item("TIPO_DOC").Value} - {oRecordSet.Fields.Item("U_SS_Est").Value}{oRecordSet.Fields.Item("U_SS_Pemi").Value}{oRecordSet.Fields.Item("FolioNum").Value}"
 
                 oRecordSet.MoveNext()
                 i += 1
@@ -465,7 +466,11 @@ Public Class frmCartera
                 oDataSource.SetValue("U_ObjType", i, oRecordSet.Fields.Item("ObjType").Value)
                 oDataSource.SetValue("U_NumInter", i, oRecordSet.Fields.Item("DocEntry").Value)
 
+                'rsboApp.StatusBar.SetText($"{oRecordSet.Fields.Item("CardName").Value} - {oRecordSet.Fields.Item("TIPO_DOC").Value} - {oRecordSet.Fields.Item("U_SS_Est").Value}{oRecordSet.Fields.Item("U_SS_Pemi").Value}{oRecordSet.Fields.Item("FolioNum").Value}",
+                '                          SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Warning)
+
                 oProgressBar.Value = i
+                oProgressBar.Text = $"{oRecordSet.Fields.Item("CardName").Value} - {oRecordSet.Fields.Item("TIPO_DOC").Value} - {oRecordSet.Fields.Item("U_SS_Est").Value}{oRecordSet.Fields.Item("U_SS_Pemi").Value}{oRecordSet.Fields.Item("FolioNum").Value}"
                 oRecordSet.MoveNext()
                 i += 1
             End While
