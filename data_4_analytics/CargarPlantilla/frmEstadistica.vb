@@ -141,10 +141,10 @@ Public Class frmEstadistica
             If pVal.FormUID = "frmEstadistica" Then
                 Select Case pVal.ItemUID
 
-                    Case "btn_cons"
-                        If pVal.BeforeAction = False AndAlso pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
-                            ' Lógica si la necesitas
-                        End If
+                    'Case "btn_cons"
+                    '    If pVal.BeforeAction = False AndAlso pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
+
+                    '    End If
 
                     Case "btnCP"
                         If pVal.BeforeAction = True AndAlso pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
