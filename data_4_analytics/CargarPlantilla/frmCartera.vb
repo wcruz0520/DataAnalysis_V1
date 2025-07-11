@@ -252,6 +252,13 @@ Public Class frmCartera
     Private Sub rsboApp_ItemEvent(ByVal FormUID As String, ByRef pVal As SAPbouiCOM.ItemEvent, ByRef BubbleEvent As Boolean) Handles rsboApp.ItemEvent
         Try
             If pVal.FormUID = "frmCartera" Then
+                If pVal.EventType = SAPbouiCOM.BoEventTypes.et_FORM_DATA_LOAD And pVal.BeforeAction = False Then
+                    oForm = rsboApp.Forms.Item("frmCartera")
+                    If oForm.Mode = SAPbouiCOM.BoFormMode.fm_OK_MODE Then
+                        ActualizarTotalesGuardados()
+                    End If
+                End If
+
                 Select Case pVal.ItemUID
                     Case "btn_cons"
                         If pVal.BeforeAction = False And pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
@@ -514,6 +521,56 @@ Public Class frmCartera
             oForm.Freeze(False)
         End Try
     End Sub
+
+    Private Sub ActualizarTotalesGuardados()
+        Dim ds As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_CARTERA_DET1")
+
+        Dim totCart As Double = 0, totCartxV As Double = 0, totCartV As Double = 0
+        Dim totAbono As Double = 0, totV30 As Double = 0, totV60 As Double = 0
+        Dim totV90 As Double = 0, totV120 As Double = 0, totVm120 As Double = 0
+
+        For i As Integer = 0 To ds.Size - 1
+            Dim tmp As Double
+            If Double.TryParse(ds.GetValue("U_Total_Cart", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totCart += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_CartxVenc", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totCartxV += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_Cart_Venc", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totCartV += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_TotalAbon", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totAbono += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_Venc_30", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totV30 += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_Venc_60", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totV60 += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_Venc_90", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totV90 += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_Venc_120", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totV120 += tmp
+            End If
+            If Double.TryParse(ds.GetValue("U_Venc_m120", i).Trim, Globalization.NumberStyles.Any, Globalization.CultureInfo.InvariantCulture, tmp) Then
+                totVm120 += tmp
+            End If
+        Next
+
+        txtTotCartera.Value = totCart.ToString("N2")
+        txtCartxVenc.Value = totCartxV.ToString("N2")
+        txtCartVenc.Value = totCartV.ToString("N2")
+        txtTotAbono.Value = totAbono.ToString("N2")
+        txtVenc30.Value = totV30.ToString("N2")
+        txtVenc60.Value = totV60.ToString("N2")
+        txtVenc90.Value = totV90.ToString("N2")
+        txtVenc120.Value = totV120.ToString("N2")
+        txtVencM120.Value = totVm120.ToString("N2")
+    End Sub
+
 
 
 End Class
