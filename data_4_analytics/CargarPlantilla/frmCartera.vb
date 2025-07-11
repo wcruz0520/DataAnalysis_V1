@@ -348,6 +348,15 @@ Public Class frmCartera
                     End If
                 End If
             End If
+
+            If pVal.BeforeAction = False Then
+                If pVal.MenuUID = "1281" OrElse pVal.MenuUID = "1282" Then
+                    If rsboApp.Forms.ActiveForm.UniqueID = "frmCartera" Then
+                        LimpiarTotales()
+                    End If
+                End If
+            End If
+
         Catch ex As Exception
             rsboApp.MessageBox("Error en MenuEvent: " & ex.Message)
         End Try
@@ -572,6 +581,16 @@ Public Class frmCartera
         txtVencM120.Value = totVm120.ToString("N2")
     End Sub
 
-
+    Private Sub LimpiarTotales()
+        txtTotCartera.Value = "0.00"
+        txtCartxVenc.Value = "0.00"
+        txtCartVenc.Value = "0.00"
+        txtTotAbono.Value = "0.00"
+        txtVenc30.Value = "0.00"
+        txtVenc60.Value = "0.00"
+        txtVenc90.Value = "0.00"
+        txtVenc120.Value = "0.00"
+        txtVencM120.Value = "0.00"
+    End Sub
 
 End Class
