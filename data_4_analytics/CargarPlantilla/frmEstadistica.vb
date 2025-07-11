@@ -226,6 +226,49 @@ Public Class frmEstadistica
                             rsboApp.StatusBar.SetText("✅ Validación de año correcta.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
                         End If
 
+                    Case "btn_add"
+                        If pVal.EventType = SAPbouiCOM.BoEventTypes.et_CLICK And pVal.BeforeAction = False Then
+                            rsboApp.Forms.ActiveForm.Freeze(True)
+                            Dim oMatrix As SAPbouiCOM.Matrix = CType(oForm.Items.Item("MTX_UDO").Specific, SAPbouiCOM.Matrix)
+
+                            If oMatrix.RowCount = 0 Then
+                                oMatrix.AddRow()
+                                For i As Integer = 1 To oMatrix.RowCount
+                                    oMatrix.Columns.Item("COL").Cells.Item(i).Specific.String = i
+                                Next
+                            Else
+                                AddRowAtSelectedPosition("frmEstadistica", oMatrix, lineaMatrix)
+                            End If
+                            rsboApp.Forms.ActiveForm.Freeze(False)
+                        End If
+
+                    Case "btn_del"
+                        If pVal.EventType = SAPbouiCOM.BoEventTypes.et_CLICK And pVal.BeforeAction = False Then
+                            Dim mMatrix As SAPbouiCOM.Matrix = rsboApp.Forms.Item(rsboApp.Forms.ActiveForm.UniqueID).Items.Item("MTX_UDO").Specific
+
+                            If mMatrix.RowCount > 0 Then
+                                mMatrix.DeleteRow(lineaMatrix)
+                            End If
+
+                            For i As Integer = 1 To mMatrix.RowCount
+                                mMatrix.Columns.Item("COL").Cells.Item(i).Specific.String = i
+                            Next
+
+                            If rsboApp.Forms.Item(rsboApp.Forms.ActiveForm.UniqueID).Mode = BoFormMode.fm_OK_MODE Then
+                                rsboApp.Forms.Item(rsboApp.Forms.ActiveForm.UniqueID).Mode = BoFormMode.fm_UPDATE_MODE
+                            End If
+                        End If
+
+                    Case "MTX_UDO"
+                        If pVal.EventType = SAPbouiCOM.BoEventTypes.et_CLICK And pVal.BeforeAction = False Then
+                            Dim selectedRow As Integer = pVal.Row
+                            lineaMatrix = pVal.Row
+                            If selectedRow > 0 Then
+                                rsboApp.StatusBar.SetText("Fila seleccionada: " & selectedRow.ToString(), SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+                            End If
+                        End If
+
+
                 End Select
             End If
 
@@ -234,6 +277,54 @@ Public Class frmEstadistica
         End Try
     End Sub
 
+    Private Sub AddRowAtSelectedPosition(ByVal FormUID As String, ByVal oMatrix As SAPbouiCOM.Matrix, ByVal SelectedRow As Integer)
+
+        Try
+
+            Dim oForm As SAPbouiCOM.Form = rsboApp.Forms.Item(FormUID)
+
+            If SelectedRow <= 0 Or SelectedRow > oMatrix.RowCount Then
+                rsboApp.StatusBar.SetText("Seleccione una fila válida.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                Return
+            End If
+
+            oMatrix.AddRow(1, SelectedRow)
+
+            Dim oDataSource As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_ESTADISTICAD")
+            oMatrix.FlushToDataSource()
+
+            Dim LineaSSetear As Integer = SelectedRow
+
+            oDataSource.SetValue("LineId", LineaSSetear, SelectedRow + 1)
+            oDataSource.SetValue("U_CC", LineaSSetear, String.Empty)
+            oDataSource.SetValue("U_FECHA", LineaSSetear, String.Empty)
+            oDataSource.SetValue("U_VEHICULOS", LineaSSetear, "0")
+            oDataSource.SetValue("U_BANDEJAS", LineaSSetear, "0")
+            oDataSource.SetValue("U_CINES", LineaSSetear, "0")
+            oDataSource.SetValue("U_CLIENTES", LineaSSetear, "0")
+
+            Dim numLineaInsert = SelectedRow + 1
+
+            For i As Integer = numLineaInsert To oDataSource.Size - 1
+                oDataSource.SetValue("LineId", i, (i).ToString())
+            Next
+
+            oMatrix.LoadFromDataSource()
+
+            For i As Integer = SelectedRow To oMatrix.RowCount
+                oMatrix.Columns.Item("COL").Cells.Item(i).Specific.String = i.ToString()
+            Next
+
+            oMatrix.SelectRow(SelectedRow, True, False)
+            oForm.Update()
+            rsboApp.StatusBar.SetText("Fila añadida correctamente.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+        Catch ex As Exception
+            rsboApp.StatusBar.SetText("Error al añadir la fila: " & ex.Message, SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+        Finally
+            rsboApp.Forms.ActiveForm.Freeze(False)
+
+        End Try
+    End Sub
 
     Function leerCSV(ByVal ruta As String) As Boolean
         Try
