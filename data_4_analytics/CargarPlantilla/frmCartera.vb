@@ -350,9 +350,11 @@ Public Class frmCartera
             End If
 
             If pVal.BeforeAction = False Then
-                If pVal.MenuUID = "1281" OrElse pVal.MenuUID = "1282" Then
-                    If rsboApp.Forms.ActiveForm.UniqueID = "frmCartera" Then
+                If rsboApp.Forms.ActiveForm.UniqueID = "frmCartera" Then
+                    If pVal.MenuUID = "1281" OrElse pVal.MenuUID = "1282" Then
                         LimpiarTotales()
+                    ElseIf pVal.MenuUID = "1288" OrElse pVal.MenuUID = "1289" OrElse pVal.MenuUID = "1290" OrElse pVal.MenuUID = "1291" Then
+                        ActualizarTotalesGuardados()
                     End If
                 End If
             End If
