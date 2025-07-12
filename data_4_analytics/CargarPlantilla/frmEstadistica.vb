@@ -231,6 +231,15 @@ Public Class frmEstadistica
 
                             ' Si pasa todo: OK
                             rsboApp.StatusBar.SetText("✅ Validación de año correcta.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+
+                            If oForm.Mode = SAPbouiCOM.BoFormMode.fm_UPDATE_MODE Then
+                                Dim resp As Integer = rsboApp.MessageBox("¿Está seguro que desea actualizar el registro?", 1, "Sí", "No")
+                                If resp <> 1 Then
+                                    BubbleEvent = False
+                                    Exit Sub
+                                End If
+                            End If
+
                         End If
 
                     Case "btn_add"
@@ -512,5 +521,20 @@ Public Class frmEstadistica
             Return False
         End Try
     End Function
+
+    Private Sub rsboApp_MenuEvent(ByRef pVal As SAPbouiCOM.MenuEvent, ByRef BubbleEvent As Boolean) Handles rsboApp.MenuEvent
+        Try
+            If pVal.BeforeAction AndAlso pVal.MenuUID = "1283" Then
+                If rsboApp.Forms.ActiveForm.UniqueID = "frmEstadistica" Then
+                    Dim respuesta As Integer = rsboApp.MessageBox("¿Está seguro que desea eliminar el registro?", 1, "Sí", "No")
+                    If respuesta <> 1 Then
+                        BubbleEvent = False
+                    End If
+                End If
+            End If
+        Catch ex As Exception
+            rsboApp.MessageBox("Error en MenuEvent: " & ex.Message)
+        End Try
+    End Sub
 
 End Class
