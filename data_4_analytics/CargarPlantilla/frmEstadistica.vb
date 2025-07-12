@@ -78,6 +78,13 @@ Public Class frmEstadistica
 
             oMatrix = oForm.Items.Item("MTX_UDO").Specific
 
+            Try
+                Dim colCC As SAPbouiCOM.Column = oMatrix.Columns.Item("B2CComer")
+                colCC.DisplayDesc = True
+            Catch ex As Exception
+                'Si no existe la columna simplemente continuamos.
+            End Try
+
             txtDocEntry.Item.Enabled = False
 
             Dim anchoTotal As Integer = oForm.Items.Item("MTX_UDO").Width
@@ -398,6 +405,12 @@ Public Class frmEstadistica
             Next
 
             oMatrix.LoadFromDataSource()
+            Try
+                Dim colCC As SAPbouiCOM.Column = oMatrix.Columns.Item("B2CComer")
+                colCC.DisplayDesc = True
+            Catch ex As Exception
+                'Si no existe la columna simplemente continuamos.
+            End Try
             oForm.Freeze(False)
             oProgressBar.Stop()
             rsboApp.StatusBar.SetText("Datos cargados desde el archivo CSV.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
