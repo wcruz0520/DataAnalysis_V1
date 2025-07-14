@@ -71,6 +71,9 @@
             <File FileName="logo11.png">
               <Actions />
             </File>
+            <File FileName="LogoBI.png">
+              <Actions />
+            </File>
             <File FileName="LogoLoc.png">
               <Actions />
             </File>
@@ -133,6 +136,9 @@
               <Actions />
             </File>
             <File FileName="logo11.png">
+              <Actions />
+            </File>
+            <File FileName="LogoBI.png">
               <Actions />
             </File>
             <File FileName="LogoLoc.png">

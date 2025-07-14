@@ -169,7 +169,7 @@ Module SubMain
             oCreationPackage.UniqueID = "mnPrincipalUdoSeruvi"
             oCreationPackage.String = "Datos para Analíticas"
             oCreationPackage.Enabled = True
-            oCreationPackage.Image = sPath & "\" & "logoPPTO3_redim.png" ' "logoV2.jpg"
+            oCreationPackage.Image = sPath & "\" & "LogoBI.png" '"logoPPTO3_redim.png" ' "logoV2.jpg"
             oCreationPackage.Position = 15
             oMenus = oMenuItem.SubMenus
             Try

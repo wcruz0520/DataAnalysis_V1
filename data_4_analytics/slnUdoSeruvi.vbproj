@@ -194,6 +194,7 @@
     <Content Include="bin\x64\Debug\icono2.png" />
     <Content Include="bin\x64\Debug\icono_pre.png" />
     <Content Include="bin\x64\Debug\logo11.png" />
+    <Content Include="bin\x64\Debug\LogoBI.png" />
     <Content Include="bin\x64\Debug\logoDA.jpg" />
     <Content Include="bin\x64\Debug\LogoLoc.png" />
     <Content Include="bin\x64\Debug\logoPPTO2_redim.png" />
