@@ -215,22 +215,22 @@ Public Class frmEstadistica
                             End If
 
                             ' Validar fechas de la matrix
-                            Dim oDataSource As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_ESTADISTICAD")
+                            'Dim oDataSource As SAPbouiCOM.DBDataSource = oForm.DataSources.DBDataSources.Item("@SS_ESTADISTICAD")
 
-                            For index As Integer = 0 To oDataSource.Size - 1
-                                Dim fechaStr As String = oDataSource.GetValue("U_FECHA", index).Trim()
-                                If fechaStr.Length >= 4 Then
-                                    Dim anioFecha As String = fechaStr.Substring(0, 4)
-                                    If anioFecha <> AnioIngresado Then
-                                        rsboApp.StatusBar.SetText($"[Error] El año ingresado ({AnioIngresado}) no coincide con el año de la línea {index + 1}: {anioFecha}.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
-                                        BubbleEvent = False
-                                        Exit Sub
-                                    End If
-                                End If
-                            Next
+                            'For index As Integer = 0 To oDataSource.Size - 1
+                            '    Dim fechaStr As String = oDataSource.GetValue("U_FECHA", index).Trim()
+                            '    If fechaStr.Length >= 4 Then
+                            '        Dim anioFecha As String = fechaStr.Substring(0, 4)
+                            '        If anioFecha <> AnioIngresado Then
+                            '            rsboApp.StatusBar.SetText($"[Error] El año ingresado ({AnioIngresado}) no coincide con el año de la línea {index + 1}: {anioFecha}.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                            '            BubbleEvent = False
+                            '            Exit Sub
+                            '        End If
+                            '    End If
+                            'Next
 
-                            ' Si pasa todo: OK
-                            rsboApp.StatusBar.SetText("✅ Validación de año correcta.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+                            '' Si pasa todo: OK
+                            'rsboApp.StatusBar.SetText("✅ Validación de año correcta.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
 
                             If oForm.Mode = SAPbouiCOM.BoFormMode.fm_UPDATE_MODE Then
                                 Dim resp As Integer = rsboApp.MessageBox("¿Está seguro que desea actualizar el registro?", 1, "Sí", "No")
