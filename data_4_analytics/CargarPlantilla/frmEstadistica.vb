@@ -368,7 +368,14 @@ Public Class frmEstadistica
                 oDataSource.InsertRecord(j)
                 oDataSource.SetValue("LineId", j, j + 1)
                 oDataSource.SetValue("U_CC", j, filas.Split(";")(0))
-                oDataSource.SetValue("U_FECHA", j, filas.Split(";")(1))
+                Dim fechaTxt As String = filas.Split(";")(1).Trim()
+                Dim fechaTmp As Date
+                Dim formatos() As String = {"yyyyMMdd", "yyyy-MM-dd"}
+                If Date.TryParseExact(fechaTxt, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, fechaTmp) Then
+                    oDataSource.SetValue("U_FECHA", j, fechaTmp.ToString("yyyyMMdd"))
+                Else
+                    oDataSource.SetValue("U_FECHA", j, fechaTxt)
+                End If
                 oDataSource.SetValue("U_VEHICULOS", j, filas.Split(";")(2))
                 oDataSource.SetValue("U_BANDEJAS", j, filas.Split(";")(3))
                 oDataSource.SetValue("U_CINES", j, filas.Split(";")(4))
@@ -379,22 +386,32 @@ Public Class frmEstadistica
             Next
 
             Dim anioIngresado As String = txtAnio.Value.Trim()
-            Dim anioFecha As String = ""
+            'Dim anioFecha As String = ""
 
             For index As Integer = 0 To oDataSource.Size - 1
                 Dim fechaStr As String = oDataSource.GetValue("U_FECHA", index).Trim()
+                Dim fechaTmp As Date
+                Dim formatos() As String = {"yyyyMMdd", "yyyy-MM-dd"}
 
-                If fechaStr.Length >= 4 Then
-                    anioFecha = fechaStr.Substring(0, 4)
+                'If fechaStr.Length >= 4 Then
+                '    anioFecha = fechaStr.Substring(0, 4)
 
-                    If anioFecha <> anioIngresado Then
-                        rsboApp.StatusBar.SetText($"[Error] La fecha en la línea {index + 1} no coincide con el año ingresado ({anioIngresado}). Valor encontrado: {fechaStr}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
-                        oForm.Freeze(False)
-                        oProgressBar.Stop()
-                        Return False
-                    End If
-                Else
+                '    If anioFecha <> anioIngresado Then
+                '        rsboApp.StatusBar.SetText($"[Error] La fecha en la línea {index + 1} no coincide con el año ingresado ({anioIngresado}). Valor encontrado: {fechaStr}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                '        oForm.Freeze(False)
+                '        oProgressBar.Stop()
+                '        Return False
+                '    End If
+                'Else
+                If Not Date.TryParseExact(fechaStr, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, fechaTmp) Then
                     rsboApp.StatusBar.SetText($"[Error] Formato de fecha inválido en línea {index + 1}: {fechaStr}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
+                    oForm.Freeze(False)
+                    oProgressBar.Stop()
+                    Return False
+                End If
+
+                If fechaTmp.Year.ToString() <> anioIngresado Then
+                    rsboApp.StatusBar.SetText($"[Error] La fecha en la línea {index + 1} no coincide con el año ingresado ({anioIngresado}). Valor encontrado: {fechaStr}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error)
                     oForm.Freeze(False)
                     oProgressBar.Stop()
                     Return False
