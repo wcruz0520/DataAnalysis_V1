@@ -259,6 +259,19 @@ Public Class frmCartera
                     End If
                 End If
 
+                'If pVal.BeforeAction = False Then
+                '    oForm = rsboApp.Forms.Item("frmCartera")
+                '    txtDocEntry = oForm.Items.Item("txt_DEntry").Specific
+                '    txtDocEntry = oForm.Items.Item("txt_DEntry").Specific
+                '    If oForm.Mode = SAPbouiCOM.BoFormMode.fm_FIND_MODE Then
+                '        txtDocEntry.Item.Enabled = True
+                '        text_fecha.Item.Enabled = True
+                '    Else
+                '        txtDocEntry.Item.Enabled = False
+                '        text_fecha.Item.Enabled = False
+                '    End If
+                'End If
+
                 Select Case pVal.ItemUID
                     Case "btn_cons"
                         If pVal.BeforeAction = False And pVal.EventType = SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED Then
@@ -353,6 +366,18 @@ Public Class frmCartera
                 If rsboApp.Forms.ActiveForm.UniqueID = "frmCartera" Then
                     If pVal.MenuUID = "1281" OrElse pVal.MenuUID = "1282" Then
                         LimpiarTotales()
+                        If pVal.MenuUID = "1281" Then
+                            txtDocEntry = oForm.Items.Item("txt_DEntry").Specific
+                            text_fecha = oForm.Items.Item("text_fecha").Specific
+                            txtDocEntry.Item.Enabled = True
+                            text_fecha.Item.Enabled = True
+                        End If
+                        If pVal.MenuUID = "1282" Then
+                            txtDocEntry = oForm.Items.Item("txt_DEntry").Specific
+                            text_fecha = oForm.Items.Item("text_fecha").Specific
+                            txtDocEntry.Item.Enabled = False
+                            text_fecha.Item.Enabled = False
+                        End If
                     ElseIf pVal.MenuUID = "1288" OrElse pVal.MenuUID = "1289" OrElse pVal.MenuUID = "1290" OrElse pVal.MenuUID = "1291" Then
                         ActualizarTotalesGuardados()
                     End If
