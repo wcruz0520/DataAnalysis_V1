@@ -228,6 +228,15 @@ Public Class frmEstadistica
                                 End If
                             End If
 
+                            If oForm.Mode = SAPbouiCOM.BoFormMode.fm_ADD_MODE Then
+
+                                Dim resp As Integer = rsboApp.MessageBox("¿Está seguro que desea agregar el registro?", 1, "Sí", "No")
+                                If resp <> 1 Then
+                                    BubbleEvent = False
+                                    Exit Sub
+                                End If
+                            End If
+
                         End If
 
                     Case "btn_add"
